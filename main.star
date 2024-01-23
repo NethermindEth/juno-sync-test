@@ -5,7 +5,7 @@ participants = import_module(
 
 BOOTNODE = {
     "type": "juno",
-    "image": "nethermindeth/juno:p2p-syncing",
+    "image": "nethermindeth/juno:p2p-syncing-e4b743e",
     "extra_args": [
         "--p2p", 
         "--p2p-bootnode", 
@@ -15,7 +15,13 @@ BOOTNODE = {
         "5f6cdc3aebcc74af494df054876100368ef6126e3a33fa65b90c765b381ffc37a0a63bbeeefab0740f24a6a38dabb513b9233254ad0020c721c23e69bc820089",
         "--network",
         "sepolia",
-    ]
+    ],
+    "ports": {
+        "p2p": {
+            "number": 7777,
+            "transport_protocol": "TCP",   
+        }
+    }
 }
 
 
@@ -24,7 +30,7 @@ def run(plan, args={}):
     
     regular = {
         "type": "juno",
-        "image": "nethermindeth/juno:p2p-syncing",
+        "image": "nethermindeth/juno:p2p-syncing-e4b743e",
         "extra_args": [
             "--p2p", 
             "--p2p-boot-peers", 
