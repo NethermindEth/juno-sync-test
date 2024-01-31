@@ -29,7 +29,8 @@ URL = "http://{}:6060/rpc/v0_5"
 
 def run(plan, args={}):
     bootnode = participants.run_participant(plan, "bootnode", BOOTNODE, None)
-    
+    # TODO: health check to make sure bootnode has started? Could e.g. curl to make sure GET [ip]:6060/ returns 200 OK
+
     regular = {
         "type": "juno",
         "image": "nethermindeth/juno:p2p-syncing-3737b85",
