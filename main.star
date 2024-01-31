@@ -5,10 +5,10 @@ participants = import_module(
 
 BOOTNODE = {
     "type": "juno",
-    "image": "nethermindeth/juno:p2p-syncing-e4b743e",
+    "image": "nethermindeth/juno:p2p-syncing-3737b85",
     "extra_args": [
         "--p2p", 
-        "--p2p-bootnode", 
+        "--p2p-feeder-node", 
         "--p2p-addr", 
         "/ip4/0.0.0.0/tcp/7777", 
         "--p2p-private-key",
@@ -24,19 +24,41 @@ BOOTNODE = {
     }
 }
 
+URL = "http://{}:6060/rpc/v0_5"
+
 
 def run(plan, args={}):
     bootnode = participants.run_participant(plan, "bootnode", BOOTNODE, None)
     
     regular = {
         "type": "juno",
-        "image": "nethermindeth/juno:p2p-syncing-e4b743e",
+        "image": "nethermindeth/juno:p2p-syncing-3737b85",
         "extra_args": [
             "--p2p", 
-            "--p2p-boot-peers", 
-            "/ip4/{}/tcp/7777/p2p/12D3KooWLdURCjbp1D7hkXWk6ZVfcMDPtsNnPHuxoTcWXFtvrxGG".format(bootnode.ip_address),
+            "--p2p-peers", 
+            "/dns/{}/tcp/7777/p2p/12D3KooWLdURCjbp1D7hkXWk6ZVfcMDPtsNnPHuxoTcWXFtvrxGG".format(bootnode.ip_address),
             "--network",
             "sepolia",
-            ]
+            "--p2p-addr", 
+            "/ip4/0.0.0.0/tcp/7777", 
+        ],
+        "ports": {
+            "p2p": {
+                "number": 7777,
+                "transport_protocol": "TCP",   
+            }
+        }
     }
     node = participants.run_participant(plan, "node-1", regular, None)
+
+
+    plan.add_service(
+        name="tester",
+        config=ServiceConfig(
+            image=ImageBuildSpec(
+                image_name="sync-test",
+                build_context_dir="./tester",
+            ),
+            cmd=["node", "index.mjs", URL.format(bootnode.ip_address), URL.format(node.ip_address)],
+        ),
+    )
