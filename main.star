@@ -5,7 +5,7 @@ participants = import_module(
 
 BOOTNODE = {
     "type": "juno",
-    "image": "nethermindeth/juno:p2p-syncing-3737b85",
+    "image": "nethermindeth/juno:p2p-syncing-88058f7",
     "extra_args": [
         "--p2p", 
         "--p2p-feeder-node", 
@@ -46,7 +46,7 @@ def run(plan, args={}):
     
     regular = {
         "type": "juno",
-        "image": "nethermindeth/juno:p2p-syncing-3737b85",
+        "image": "nethermindeth/juno:p2p-syncing-88058f7",
         "extra_args": [
             "--p2p", 
             "--p2p-peers", 
@@ -66,6 +66,6 @@ def run(plan, args={}):
     node = participants.run_participant(plan, "node-1", regular, None)
 
     plan.exec(TESTER_SERVICE_NAME, ExecRecipe(
-        ["node", "index.mjs", "https://alpha-sepolia.starknet.io/rpc/v0_5", URL.format(node.ip_address)]
+        ["node", "index.mjs", "https://alpha-sepolia.starknet.io/feeder_gateway/", URL.format(node.ip_address)]
         )
     )
