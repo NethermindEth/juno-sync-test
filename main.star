@@ -25,12 +25,25 @@ BOOTNODE = {
 }
 
 URL = "http://{}:6060/rpc/v0_5"
+TESTER_SERVICE_NAME="tester"
 
 
 def run(plan, args={}):
     bootnode = participants.run_participant(plan, "bootnode", BOOTNODE, None)
-    # TODO: health check to make sure bootnode has started? Could e.g. curl to make sure GET [ip]:6060/ returns 200 OK
+    bootnode_url = URL.format(bootnode.ip_address)
 
+    tester = plan.add_service(
+        name=TESTER_SERVICE_NAME,
+        config=ServiceConfig(
+            image=ImageBuildSpec(
+                image_name="sync-test",
+                build_context_dir="./tester",
+            ),
+            cmd=["bash", "ensure_node_is_running.sh", bootnode_url],
+        ),
+    )
+
+    
     regular = {
         "type": "juno",
         "image": "nethermindeth/juno:p2p-syncing-3737b85",
@@ -52,14 +65,7 @@ def run(plan, args={}):
     }
     node = participants.run_participant(plan, "node-1", regular, None)
 
-
-    plan.add_service(
-        name="tester",
-        config=ServiceConfig(
-            image=ImageBuildSpec(
-                image_name="sync-test",
-                build_context_dir="./tester",
-            ),
-            cmd=["node", "index.mjs", URL.format(bootnode.ip_address), URL.format(node.ip_address)],
-        ),
+    plan.exec(TESTER_SERVICE_NAME, ExecRecipe(
+        ["node", "index.mjs", "https://alpha-sepolia.starknet.io/rpc/v0_5", URL.format(node.ip_address)]
+        )
     )
