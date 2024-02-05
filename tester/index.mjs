@@ -1,56 +1,38 @@
 import { RpcProvider } from "starknet";
 
-const feederNodeUrl = process.argv[2];
-const syncingNodeUrls = process.argv.slice(3);
+const base = new RpcProvider({ nodeUrl: process.argv[2] });
+const syncing = new RpcProvider({ nodeUrl: process.argv[3] });
 
-async function syncNodes() {
-  const feederNode = new RpcProvider({ nodeUrl: feederNodeUrl });
-  const targetBlock = (await feederNode.getBlockLatestAccepted()).block_number;
-  console.log(`Target block number: ${targetBlock}`);
+async function syncNode() {
+    let baseBlock = await base.getBlockLatestAccepted();
+    console.log(`Initial base block: ${baseBlock.block_number}`);
 
-  for (let i = 0; i < syncingNodeUrls.length; i++) {
-    console.log(`Checking sync for Node ${i + 1}`);
-    await checkNodeSync(i + 1, syncingNodeUrls[i], targetBlock);
-  }
-  console.log("All nodes synced successfully.");
-}
-
-async function checkNodeSync(nodeIndex, nodeUrl, targetBlock) {
-  return new Promise(async (resolve, reject) => {
-    const syncingNode = new RpcProvider({ nodeUrl });
-    let lastKnownBlock = 0;
-    console.log(`Starting sync check for Node ${nodeIndex} at URL: ${nodeUrl}`);
-
-    const intervalId = setInterval(async () => {
-      try {
-        const currentBlock = (await syncingNode.getBlockLatestAccepted()).block_number;
-        lastKnownBlock = currentBlock;
-        console.log(`Node ${nodeIndex} - Current block: ${currentBlock}`);
-
-        if (currentBlock >= targetBlock) {
-          console.log(`Node ${nodeIndex} has caught up. Sync time: ${Math.floor((Date.now() - startTime) / 1000 / 60)} minutes.`);
-          clearInterval(intervalId);
-          resolve();
+    const timer = setInterval(async () => {
+        try {
+            const syncingBlock = await syncing.getBlockLatestAccepted();
+            console.log(`Base: ${baseBlock.block_number}, Syncing: ${syncingBlock.block_number}`);
+            
+            if (syncingBlock.block_number >= baseBlock.block_number) {
+                console.log("Syncing node has caught up or surpassed the base node.");
+                baseBlock = await base.getBlockLatestAccepted();
+                if (syncingBlock.block_number >= baseBlock.block_number) {
+                    console.log("Confirmed: Syncing node is up-to-date or ahead. Stopping checks.");
+                    clearInterval(timer);
+                }
+            }
+        } catch (error) {
+            console.error(`Error during sync check: ${error.message}`);
+            clearInterval(timer);
         }
-      } catch (error) {
-        console.error(`Node ${nodeIndex} error: ${error.message}`);
-        clearInterval(intervalId);
-        reject(error);
-      }
     }, 10000);
 
-    const startTime = Date.now();
     setTimeout(() => {
-      if (intervalId) {
-        console.log(`Node ${nodeIndex} sync check timeout. Last known block: ${lastKnownBlock}, Target block: ${targetBlock}`);
-        clearInterval(intervalId);
-        reject(new Error(`Node ${nodeIndex} failed to sync within 1h.`));
-      }
-    }, 3600000);
-  });
+        console.log("Stopping automatic checks after 30 minutes.");
+        clearInterval(timer);
+    }, 30 * 60 * 1000);
 }
 
-syncNodes().catch(error => {
-  console.error(`Error occurred: ${error.message}`);
-  process.exit(1);
+syncNode().catch(error => {
+    console.error(`Error occurred: ${error.message}`);
+    process.exit(1);
 });
