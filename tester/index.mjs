@@ -8,21 +8,14 @@ async function syncNodes() {
   const targetBlock = (await feederNode.getBlockLatestAccepted()).block_number;
   console.log(`Target block number: ${targetBlock}`);
 
-  const promises = syncingNodeUrls.map((nodeUrl, index) => 
-    checkNodeSync(index + 1, nodeUrl, targetBlock)
-  );
-
-  try {
-    await Promise.all(promises);
-    console.log("All nodes synced successfully.");
-    process.exit(0);
-  } catch (error) {
-    console.error(`Sync failed: ${error.message}`);
-    process.exit(1);
+  for (let i = 0; i < syncingNodeUrls.length; i++) {
+    console.log(`Checking sync for Node ${i + 1}`);
+    await checkNodeSync(i + 1, syncingNodeUrls[i], targetBlock);
   }
+  console.log("All nodes synced successfully.");
 }
 
-function checkNodeSync(nodeIndex, nodeUrl, targetBlock) {
+async function checkNodeSync(nodeIndex, nodeUrl, targetBlock) {
   return new Promise(async (resolve, reject) => {
     const syncingNode = new RpcProvider({ nodeUrl });
     let lastKnownBlock = 0;
@@ -40,19 +33,24 @@ function checkNodeSync(nodeIndex, nodeUrl, targetBlock) {
           resolve();
         }
       } catch (error) {
+        console.error(`Node ${nodeIndex} error: ${error.message}`);
         clearInterval(intervalId);
-        reject(new Error(`Node ${nodeIndex} error: ${error.message}`));
+        reject(error);
       }
     }, 10000);
 
     const startTime = Date.now();
     setTimeout(() => {
-      clearInterval(intervalId);
-      reject(new Error(`Node ${nodeIndex} failed to sync within 1h. Last known block: ${lastKnownBlock}, Target block: ${targetBlock}`));
+      if (intervalId) {
+        console.log(`Node ${nodeIndex} sync check timeout. Last known block: ${lastKnownBlock}, Target block: ${targetBlock}`);
+        clearInterval(intervalId);
+        reject(new Error(`Node ${nodeIndex} failed to sync within 1h.`));
+      }
     }, 3600000);
   });
 }
 
 syncNodes().catch(error => {
   console.error(`Error occurred: ${error.message}`);
+  process.exit(1);
 });
