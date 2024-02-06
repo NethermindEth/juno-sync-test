@@ -2,7 +2,7 @@ participants = import_module(
     "github.com/piwonskp/startnet/src/participants.star"
 )
 
-BOOTNODE_IP = "35.237.92.52"
+BOOTNODE_IP = "34.138.100.215"
 URL = "http://{}:6060"
 BOOTNODE_URL = URL.format(BOOTNODE_IP)
 TESTER_SERVICE_NAME = "tester"
@@ -15,7 +15,6 @@ def run(plan, args={}):
                 image_name="sync-test",
                 build_context_dir="./tester",
             ),
-            cmd=["bash", "ensure_node_is_running.sh", BOOTNODE_URL],
         ),
     )
     
@@ -25,7 +24,7 @@ def run(plan, args={}):
         "extra_args": [
             "--p2p", 
             "--p2p-peers", 
-            "/dns/{}/tcp/7777/p2p/12D3KooWLdURCjbp1D7hkXWk6ZVfcMDPtsNnPHuxoTcWXFtvrxGG".format(BOOTNODE_IP),
+            "/ip4/{}/tcp/7777/p2p/12D3KooWR8ikUDiinyE5wgdYiqsdLfJRsBDYKGii6L3oyoipVEaV".format(BOOTNODE_IP),
             "--network",
             "sepolia",
             "--p2p-addr", 

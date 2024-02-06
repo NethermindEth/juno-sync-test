@@ -18,6 +18,7 @@ async function syncNode() {
                 if (syncingBlock.block_number >= baseBlock.block_number) {
                     console.log("Confirmed: Syncing node is up-to-date or ahead. Stopping checks.");
                     clearInterval(timer);
+                    process.exit(0);
                 }
             }
         } catch (error) {
@@ -27,9 +28,9 @@ async function syncNode() {
     }, 10000);
 
     setTimeout(() => {
-        console.log("Stopping automatic checks after 30 minutes.");
+        console.log("Stopping automatic checks after 1h.");
         clearInterval(timer);
-    }, 30 * 60 * 1000);
+    }, 60 * 60 * 1000);
 }
 
 syncNode().catch(error => {
