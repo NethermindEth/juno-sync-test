@@ -20,7 +20,7 @@ def run(plan, args={}):
     
     regular = {
         "type": "juno",
-        "image": "nethermindeth/juno:p2p-syncing-1828673",
+        "image": "nethermindeth/juno:v0.10.0",
         "extra_args": [
             "--p2p", 
             "--p2p-peers", 
