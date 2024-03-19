@@ -2,12 +2,12 @@ participants = import_module(
     "github.com/piwonskp/startnet/src/participants.star"
 )
 
-BOOTNODE_IP = "34.138.100.215"
 URL = "http://{}:6060"
+BOOTNODE_IP="35.231.83.158"
 BOOTNODE_URL = URL.format(BOOTNODE_IP)
 TESTER_SERVICE_NAME = "tester"
 
-def run(plan, args={}):
+def run(plan, juno_version = "v0.11.1"):
     tester = plan.add_service(
         name=TESTER_SERVICE_NAME,
         config=ServiceConfig(
@@ -20,11 +20,11 @@ def run(plan, args={}):
     
     regular = {
         "type": "juno",
-        "image": "nethermindeth/juno:v0.10.0",
+        "image": "nethermindeth/juno:{}".format(juno_version),
         "extra_args": [
             "--p2p", 
             "--p2p-peers", 
-            "/ip4/{}/tcp/7777/p2p/12D3KooWR8ikUDiinyE5wgdYiqsdLfJRsBDYKGii6L3oyoipVEaV".format(BOOTNODE_IP),
+            "/ip4/35.231.83.158/tcp/7777/p2p/12D3KooWPuESJuHpSPEzxNXVhEPKzsAM2XzQkHF5hGiSLfXytDCw,/ip4/34.74.209.221/tcp/7777/p2p/12D3KooWH74yt5NPvymHHq9BEbccpELjqzBJakdyYC7EwQp3uzm4,/ip4/35.237.118.253/tcp/7777/p2p/12D3KooWQfujjvm117NC6voD7yxPcwrFnnSbNq51AGnNRtwW3Rj8,/ip4/34.148.79.4/tcp/7777/p2p/12D3KooWNKz9BJmyWVFUnod6SQYLG4dYZNhs3GrMpiot63Y1DLYS",
             "--network",
             "sepolia",
             "--p2p-addr", 

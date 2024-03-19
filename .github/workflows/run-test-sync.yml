@@ -20,4 +20,4 @@ jobs:
 
       - name: Run p2p sync tests
         run: |
-          kurtosis run kurtosis.yml
+          kurtosis run kurtosis.yml '{"juno_version":"latest"}'
