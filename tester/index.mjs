@@ -24,13 +24,15 @@ async function syncNode() {
         } catch (error) {
             console.error(`Error during sync check: ${error.message}`);
             clearInterval(timer);
+            process.exit(1);
         }
     }, 10000);
 
     setTimeout(() => {
-        console.log("Stopping automatic checks after 1h.");
+        console.log("Stopping automatic checks after 3h.");
         clearInterval(timer);
-    }, 60 * 60 * 1000);
+        process.exit(1);
+    }, 3 * 60 * 60 * 1000);
 }
 
 syncNode().catch(error => {
