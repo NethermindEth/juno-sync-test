@@ -30,7 +30,7 @@ async function syncNode() {
     setTimeout(() => {
         console.log("Stopping automatic checks after 1h.");
         clearInterval(timer);
-    }, 60 * 60 * 1000);
+    }, 3 * 60 * 60 * 1000);
 }
 
 syncNode().catch(error => {
